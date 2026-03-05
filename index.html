@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zelda Lofi - Chill Beats from Hyrule</title>
+  <meta name="description" content="Listen to lofi Zelda music remixes. A chill study companion from Hyrule with ambient sounds and a Pomodoro timer." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 95'><polygon points='50,5 75,48 25,48' fill='%23d4a843'/><polygon points='25,48 50,91 0,91' fill='%23d4a843'/><polygon points='75,48 100,91 50,91' fill='%23d4a843'/></svg>" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!-- Background image layer -->
+  <div id="bg-layer">
+    <img src="/lofi_girl_zelda.png" alt="Zelda-themed Lofi Girl studying at her desk with headphones, surrounded by Zelda memorabilia" />
+  </div>
+
+  <!-- Pomodoro HUD (top-left) — hidden until timer starts -->
+  <div id="pomodoro-hud">
+    <div id="heart-row"></div>
+    <div id="timer-info">
+      <span id="timer-display">25:00</span>
+      <button id="timer-toggle" class="hud-btn" aria-label="Start focus timer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21" /></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- "Press Start" overlay -->
+  <div id="start-overlay">
+    <div id="start-content">
+      <svg id="triforce" viewBox="0 0 100 90" width="80" height="72">
+        <polygon points="50,5 75,48 25,48" fill="var(--triforce-gold)" />
+        <polygon points="25,48 50,91 0,91" fill="var(--triforce-gold)" />
+        <polygon points="75,48 100,91 50,91" fill="var(--triforce-gold)" />
+      </svg>
+      <h1>Zelda Lofi</h1>
+      <p>Tap to Begin Your Quest</p>
+    </div>
+  </div>
+
+  <!-- Backdrop for closing panel on outside click -->
+  <div id="panel-backdrop"></div>
+
+  <!-- Bottom control panel -->
+  <div id="control-panel" data-state="collapsed">
+
+    <!-- Collapsed mini-player bar -->
+    <div id="panel-handle">
+      <button id="panel-toggle" aria-label="Expand controls">
+        <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="18 15 12 9 6 15" />
+        </svg>
+      </button>
+      <div id="mini-player">
+        <button id="mini-play-pause" aria-label="Play">
+          <svg class="icon-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21" /></svg>
+          <svg class="icon-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+        </button>
+        <span id="mini-track-name">No track loaded</span>
+        <input type="range" id="mini-volume" min="0" max="100" value="70" aria-label="Volume" />
+      </div>
+    </div>
+
+    <!-- Expanded panel body -->
+    <div id="panel-body">
+      <!-- Tab navigation -->
+      <nav id="panel-tabs" role="tablist">
+        <button role="tab" data-tab="player" class="active" aria-selected="true" aria-controls="tab-player">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none"/></svg>
+          <span class="tab-label">Player</span>
+        </button>
+        <button role="tab" data-tab="ambience" aria-selected="false" aria-controls="tab-ambience">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          <span class="tab-label">Ambience</span>
+        </button>
+        <button role="tab" data-tab="timer" aria-selected="false" aria-controls="tab-timer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span class="tab-label">Timer</span>
+        </button>
+      </nav>
+
+      <!-- Tab: Music Player -->
+      <section id="tab-player" class="tab-content active" role="tabpanel">
+        <div id="now-playing">
+          <div id="track-info">
+            <h2 id="track-title">No track loaded</h2>
+            <p id="track-game"></p>
+          </div>
+          <div id="progress-row">
+            <span id="time-current">0:00</span>
+            <input type="range" id="seek-bar" min="0" max="100" value="0" aria-label="Seek" />
+            <span id="time-total">0:00</span>
+          </div>
+          <div id="player-controls">
+            <button id="btn-prev" aria-label="Previous track">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="3" height="14"/><polygon points="21,5 10,12 21,19"/></svg>
+            </button>
+            <button id="btn-play-pause" aria-label="Play" class="btn-primary">
+              <svg class="icon-play" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21" /></svg>
+              <svg class="icon-pause" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+            </button>
+            <button id="btn-next" aria-label="Next track">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="3,5 14,12 3,19"/><rect x="18" y="5" width="3" height="14"/></svg>
+            </button>
+            <button id="btn-shuffle" aria-label="Toggle shuffle" class="btn-toggle">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+            </button>
+            <div id="volume-control">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+              <input type="range" id="volume-slider" min="0" max="100" value="70" aria-label="Volume" />
+            </div>
+          </div>
+        </div>
+        <div id="playlist">
+          <ul id="track-list"></ul>
+        </div>
+      </section>
+
+      <!-- Tab: Ambient Mixer -->
+      <section id="tab-ambience" class="tab-content" role="tabpanel" hidden>
+        <div id="ambient-grid"></div>
+      </section>
+
+      <!-- Tab: Pomodoro Timer -->
+      <section id="tab-timer" class="tab-content" role="tabpanel" hidden>
+        <div id="timer-settings">
+          <div class="timer-field">
+            <label for="focus-min">Focus</label>
+            <div class="timer-input-group">
+              <input type="number" id="focus-min" value="25" min="1" max="180" />
+              <span>min</span>
+            </div>
+          </div>
+          <div class="timer-field">
+            <label for="break-min">Break</label>
+            <div class="timer-input-group">
+              <input type="number" id="break-min" value="5" min="1" max="60" />
+              <span>min</span>
+            </div>
+          </div>
+          <div class="timer-field">
+            <label for="heart-count">Hearts</label>
+            <div class="timer-input-group">
+              <input type="number" id="heart-count" value="5" min="3" max="20" />
+            </div>
+          </div>
+          <div id="timer-actions">
+            <button id="timer-start" class="btn-zelda">Begin Quest</button>
+            <button id="timer-reset" class="btn-zelda btn-secondary">Reset</button>
+            <button id="timer-hud-toggle" class="btn-zelda btn-secondary">Show HUD</button>
+          </div>
+        </div>
+        <div id="timer-large-display">
+          <div id="large-heart-row"></div>
+          <span id="large-timer-text">25:00</span>
+          <span id="timer-phase"></span>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
