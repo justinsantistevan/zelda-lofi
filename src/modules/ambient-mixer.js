@@ -4,6 +4,22 @@ export function initAmbientMixer(audioContext) {
   const grid = document.getElementById('ambient-grid')
   const sounds = new Map()
 
+  // Route Web Audio output through a hidden <audio> element so ambient sounds
+  // continue playing on mobile lock screens and through AirPlay/remote speakers.
+  const streamDest = audioContext.createMediaStreamDestination()
+  const carrierAudio = document.createElement('audio')
+  carrierAudio.srcObject = streamDest.stream
+  carrierAudio.setAttribute('playsinline', '')
+
+  function updateCarrier() {
+    const anyActive = [...sounds.values()].some(({ state }) => state.active)
+    if (anyActive) {
+      carrierAudio.play().catch(() => {})
+    } else {
+      carrierAudio.pause()
+    }
+  }
+
   // Build UI and initialize state for each ambient sound
   ambients.forEach((def) => {
     const card = document.createElement('div')
@@ -25,7 +41,7 @@ export function initAmbientMixer(audioContext) {
       gainNode: audioContext.createGain(),
     }
     state.gainNode.gain.value = 0
-    state.gainNode.connect(audioContext.destination)
+    state.gainNode.connect(streamDest)
     sounds.set(def.id, { def, state, card, slider })
 
     // Toggle on card click (but not on slider interaction)
@@ -61,6 +77,7 @@ export function initAmbientMixer(audioContext) {
       state.active = false
       card.classList.remove('active')
       state.gainNode.gain.setTargetAtTime(0, audioContext.currentTime, 0.08)
+      updateCarrier()
       // Stop source after fade
       const src = state.source
       if (src) {
@@ -90,6 +107,7 @@ export function initAmbientMixer(audioContext) {
       state.active = true
       card.classList.add('active')
       state.gainNode.gain.setTargetAtTime(state.volume, audioContext.currentTime, 0.05)
+      updateCarrier()
     }
   }
 

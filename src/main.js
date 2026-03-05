@@ -46,6 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saved.ambients) mixer.restore(saved.ambients)
     if (saved.timer) timer.restore(saved.timer)
 
+    // Resume AudioContext when returning from background (mobile lock screen, tab switch)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && audioContext.state === 'suspended') {
+        audioContext.resume()
+      }
+    })
+
     // Auto-play first track
     player.play()
 
