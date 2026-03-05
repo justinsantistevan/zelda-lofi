@@ -1,8 +1,24 @@
 import { ambients } from '../data/ambients.js'
 
-export function initAmbientMixer() {
+export function initAmbientMixer(audioContext) {
   const grid = document.getElementById('ambient-grid')
   const sounds = new Map()
+
+  // Route Web Audio output through a hidden <audio> element so ambient sounds
+  // continue playing on mobile lock screens and through AirPlay/remote speakers.
+  const streamDest = audioContext.createMediaStreamDestination()
+  const carrierAudio = document.createElement('audio')
+  carrierAudio.srcObject = streamDest.stream
+  carrierAudio.setAttribute('playsinline', '')
+
+  function updateCarrier() {
+    const anyActive = [...sounds.values()].some(({ state }) => state.active)
+    if (anyActive) {
+      carrierAudio.play().catch(() => {})
+    } else {
+      carrierAudio.pause()
+    }
+  }
 
   // Build UI and initialize state for each ambient sound
   ambients.forEach((def) => {
@@ -17,15 +33,15 @@ export function initAmbientMixer() {
     grid.appendChild(card)
 
     const slider = card.querySelector('.ambient-volume')
-
-    // Use a standard <audio> element so playback routes through AirPlay,
-    // Bluetooth, and persists on mobile lock screens.
-    const audio = new Audio(def.src)
-    audio.loop = true
-    audio.preload = 'none'
-    audio.volume = 0
-
-    const state = { active: false, volume: 0.4, audio }
+    const state = {
+      active: false,
+      volume: 0.4,
+      buffer: null,
+      source: null,
+      gainNode: audioContext.createGain(),
+    }
+    state.gainNode.gain.value = 0
+    state.gainNode.connect(streamDest)
     sounds.set(def.id, { def, state, card, slider })
 
     // Toggle on card click (but not on slider interaction)
@@ -39,55 +55,60 @@ export function initAmbientMixer() {
       const vol = e.target.value / 100
       state.volume = vol
       if (state.active) {
-        audio.volume = vol
+        state.gainNode.gain.setTargetAtTime(vol, audioContext.currentTime, 0.05)
       }
     })
   })
 
-  function toggleSound(id) {
+  async function loadBuffer(def) {
+    const response = await fetch(def.src)
+    const arrayBuffer = await response.arrayBuffer()
+    return audioContext.decodeAudioData(arrayBuffer)
+  }
+
+  async function toggleSound(id) {
     const entry = sounds.get(id)
     if (!entry) return
 
-    const { state, card } = entry
+    const { def, state, card, slider } = entry
 
     if (state.active) {
+      // Fade out and stop
       state.active = false
       card.classList.remove('active')
-      // Fade out then pause
-      fadeVolume(state.audio, 0, 200, () => {
-        state.audio.pause()
-      })
+      state.gainNode.gain.setTargetAtTime(0, audioContext.currentTime, 0.08)
+      updateCarrier()
+      // Stop source after fade
+      const src = state.source
+      if (src) {
+        setTimeout(() => {
+          try { src.stop() } catch {}
+          state.source = null
+        }, 300)
+      }
     } else {
+      // Load buffer if needed
+      if (!state.buffer) {
+        try {
+          state.buffer = await loadBuffer(def)
+        } catch {
+          return // audio file not available
+        }
+      }
+
+      // Create and start looping source
+      const source = audioContext.createBufferSource()
+      source.buffer = state.buffer
+      source.loop = true
+      source.connect(state.gainNode)
+      source.start()
+      state.source = source
+
       state.active = true
       card.classList.add('active')
-      state.audio.volume = 0
-      state.audio.play().then(() => {
-        fadeVolume(state.audio, state.volume, 200)
-      }).catch(() => {})
+      state.gainNode.gain.setTargetAtTime(state.volume, audioContext.currentTime, 0.05)
+      updateCarrier()
     }
-  }
-
-  function fadeVolume(audio, target, durationMs, onDone) {
-    const start = audio.volume
-    const diff = target - start
-    if (Math.abs(diff) < 0.01) {
-      audio.volume = target
-      if (onDone) onDone()
-      return
-    }
-    const steps = 10
-    const stepMs = durationMs / steps
-    let step = 0
-    const interval = setInterval(() => {
-      step++
-      if (step >= steps) {
-        clearInterval(interval)
-        audio.volume = target
-        if (onDone) onDone()
-      } else {
-        audio.volume = start + diff * (step / steps)
-      }
-    }, stepMs)
   }
 
   return {

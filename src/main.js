@@ -36,14 +36,22 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.classList.add('hidden')
 
     // Initialize audio systems
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)()
     player = initMusicPlayer()
-    mixer = initAmbientMixer()
+    mixer = initAmbientMixer(audioContext)
 
     // Restore saved state
     const saved = loadState()
     if (saved.music) player.restore(saved.music)
     if (saved.ambients) mixer.restore(saved.ambients)
     if (saved.timer) timer.restore(saved.timer)
+
+    // Resume AudioContext when returning from background (mobile lock screen, tab switch)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && audioContext.state === 'suspended') {
+        audioContext.resume()
+      }
+    })
 
     // Auto-play first track
     player.play()
