@@ -1,6 +1,6 @@
 # Zelda Lofi
 
-A cozy, browser-based lofi music player themed around *The Legend of Zelda* series. Pair ambient soundscapes with 79 lofi remixes, track your focus sessions with a Pomodoro timer styled after Zelda's heart system, and study or chill in a Sheikah terminal aesthetic.
+A cozy, browser-based lofi music player themed around *The Legend of Zelda* series. Pair ambient soundscapes with 77 lofi remixes (credit to original artists), track your focus sessions with a Pomodoro timer styled after Zelda's heart system, and study or chill in a Sheikah terminal aesthetic.
 
 Live at **[zelda-lofi.vercel.app](https://zelda-lofi.vercel.app)**
 
@@ -9,7 +9,7 @@ Live at **[zelda-lofi.vercel.app](https://zelda-lofi.vercel.app)**
 ## Features
 
 ### Music Player
-- **77 lofi tracks** sourced from across the Zelda series — Ocarina of Time, Breath of the Wild, Tears of the Kingdom, Majora's Mask, The Wind Waker, Twilight Princess, Skyward Sword, Link's Awakening, A Link to the Past, and more
+- **77 lofi tracks** sourced from talented lofi compliations on YouTube across the Zelda series — Ocarina of Time, Breath of the Wild, Tears of the Kingdom, Majora's Mask, The Wind Waker, Twilight Princess, Skyward Sword, Link's Awakening, A Link to the Past, and more. 77 tracks at launch provide more than 3.5 hours of music.
 - Shuffle mode with Fisher-Yates queue (no immediate repeats)
 - Seek bar, volume control, prev/next navigation
 - **Media Session API** integration — control playback from your OS lock screen or media keys
@@ -159,3 +159,10 @@ The UI uses a "dark fantasy meets cozy lofi" Sheikah terminal aesthetic.
 ## License
 
 Personal project. Zelda music and characters are © Nintendo. All lofi remixes belong to their respective creators.
+
+Music track sources:
+Zelda's Lofi Kingdom, by GameChops and jokabi: https://www.youtube.com/watch?v=Z3GA0GQCE2M
+Zelda & Chill Trilogy, by GameChops: https://www.youtube.com/watch?v=oCaOSz13h_o
+Zelda & Jazz, by GameChops: https://www.youtube.com/watch?v=OH69pRR5OfI
+
+Ambient sounds from freesound.org
