@@ -1,0 +1,12 @@
+# Files not needed by the Vite build — keeps them out of the deployment
+# source upload. Do NOT add public/, src/, index.html, vite.config.js, or
+# package*.json here: the build reads them.
+
+scripts/
+lofi_girl_zelda_clean.png
+.specstory/
+.playwright-mcp/
+.claude/
+.cursorindexingignore
+.vscode/
+README.md
